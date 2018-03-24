@@ -9,6 +9,7 @@ class User extends CI_Controller {
         $this->load->helper('url');
         $this->load->helper('form');
         $this->load->model('user_model');
+        $this->load->library('form_validation');
     }
     
     /**
@@ -42,9 +43,40 @@ class User extends CI_Controller {
      */
     public function add()
     {
-        $data['heading'] = "Welcome to add User!";
+        $this->form_validation->set_error_delimiters('<span class="error">', '</span>');
         
-        $this->load->view('users/user_add', $data);
+        $this->form_validation->set_rules('username', 'Username', 'required');
+        $this->form_validation->set_rules('password', 'Password', 'required', array('required' => 'You must provide a %s.'));
+        
+        if($this->form_validation->run() == FALSE)
+        {
+            $data['heading'] = "Welcome to add User!";
+            
+            $this->load->view('users/user_add', $data);
+        }
+        else 
+        {
+            $username = $this->input->post('username');
+            $password = md5($this->input->post('password'));
+            $gender = $this->input->post('gender');
+            $birthday = $this->input->post('birthday');
+            $grade = $this->input->post('grade');
+            $industry = $this->input->post('industry');
+            $city = $this->input->post('city');
+            $hobby = $this->input->post('hobby');
+            
+            $return_flag =$this->user_model->add_user($username, $password, $gender, $birthday, $grade, $industry, $city, $hobby);
+            
+            if($return_flag == TRUE)
+            {
+                redirect('user/index');
+            }
+            else 
+            {
+                return FALSE;
+            }
+        }
+        
         return true;
     }
     
